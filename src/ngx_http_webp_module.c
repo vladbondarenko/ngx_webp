@@ -124,8 +124,8 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
 
     if ( status != 0 ){
       return NGX_HTTP_INTERNAL_SERVER_ERROR;
+     }
     }
-}
     if (pos == NULL) {
       d = p;
       dpath = lpath;
@@ -230,7 +230,6 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
     out.buf = b;
     out.next = NULL;
 
-//    unlink("/tmp/webp.webp");
     return ngx_http_output_filter(r, &out);
 }
 
