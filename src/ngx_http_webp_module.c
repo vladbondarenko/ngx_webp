@@ -102,13 +102,18 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
     }
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Source filename status: \"%s\"", lpath.data);
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Detination filename status: \"%s\"", dpath.data);
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Destination filename status: \"%s\"", dpath.data);
+
+//    char lp = printf("\"%s\"", lpath.data);
+//    char dp = printf("\"%s\"", dpath.data);
 
     if (pos != NULL) {
     switch( child_pid )
      {
        case 0:
-       execlp( "/usr/bin/cwebp", "-lossless -m 6 -q 100", lpath.data , "-o", dpath.data , NULL );
+       execlp( "/usr/bin/cwebp","-lossless", "-m", "0", lpath.data ,"-o", dpath.data, NULL );
+//       execlp( "/usr/bin/cwebp","-lossless -m 6 -q 80", lp ,"-o", dp, NULL );
+//       execlp( "/usr/bin/webpconverter", "/usr/bin/webpconverter", lp , dp, NULL );
        default:
        break;
      }
