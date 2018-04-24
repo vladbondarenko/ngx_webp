@@ -72,6 +72,16 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
     ngx_uint_t                      level;
     ngx_log_t                      *log;
 
+    u_char *accept, *pos;
+
+    accept = r->headers_in.accept->value.data;
+
+    pos = ngx_strnstr(accept, (char *)"webp", 50);
+
+    if (pos != NULL) {
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "accept webp status: %s\n", accept);
+    }
+
     p = ngx_http_map_uri_to_path(r, &lpath, &root, sizeof(".webp") - 1);
 
     lpath.len = p - lpath.data;
@@ -84,13 +94,14 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
     *d++ = 'p';
     *d = '\0';
     dpath.len = d - dpath.data;
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http2 filename status: \"%s\"", lpath.data);
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "random filename status: \"%s\"", dpath.data);
+
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Source filename status: \"%s\"", lpath.data);
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Detination filename status: \"%s\"", dpath.data);
 
     switch( child_pid )
      {
        case 0:
-       execlp( "/usr/bin/cwebp", "-q", "70", lpath.data , "-o", dpath.data , NULL );
+       execlp( "/usr/bin/cwebp", "-lossless -m 6 -q 100", lpath.data , "-o", dpath.data , NULL );
        default:
        break;
      }
@@ -101,7 +112,7 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
     wait( &status );
     waitpid(child_pid, &status, WEXITED);
 
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "na webp status: %d\n", status);
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "status: %d\n", status);
 
     if ( status != 0 ){
       return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -151,9 +162,9 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
         return NGX_DECLINED;
     }
 
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "random2 filename status: \"%s\"", dpath.data);
+//    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "random2 filename status: \"%s\"", dpath.data);
 
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "uri webp status: %s\n", r->uri.data);
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "uri status: %s\n", r->uri.data);
 
     r->headers_out.status = NGX_HTTP_OK;
     r->headers_out.content_length_n = of.size;
