@@ -16,8 +16,7 @@ Under development. To be continued.
 
 ### `webp`
 
-- **syntax**: `webp on|off`
-- **default**: `off`
+- **syntax**: `webp`
 - **context**: `location`
 
 Enables or disables module.
