@@ -75,16 +75,16 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
     u_char *accept, *pos;
 
     accept = r->headers_in.accept->value.data;
-
     pos = ngx_strnstr(accept, (char *)"webp", 50);
 
     if (pos != NULL) {
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "accept webp status: %s\n", accept);
+       ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "accept webp status: %s\n", accept);
     }
 
     p = ngx_http_map_uri_to_path(r, &lpath, &root, sizeof(".webp") - 1);
 
     lpath.len = p - lpath.data;
+
     ngx_str_t dpath;
     d = ngx_http_map_uri_to_path(r, &dpath, &root, sizeof(".webp") - 1);
     *d++ = '.';
@@ -95,9 +95,16 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
     *d = '\0';
     dpath.len = d - dpath.data;
 
+    if (pos == NULL) {
+      d = p;
+      dpath = lpath;
+      dpath.data = lpath.data;
+    }
+
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Source filename status: \"%s\"", lpath.data);
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Detination filename status: \"%s\"", dpath.data);
 
+    if (pos != NULL) {
     switch( child_pid )
      {
        case 0:
@@ -114,9 +121,17 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "status: %d\n", status);
 
+
     if ( status != 0 ){
       return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
+}
+    if (pos == NULL) {
+      d = p;
+      dpath = lpath;
+      dpath.data = lpath.data;
+    }
+
 
     log = r->connection->log;
 
@@ -135,6 +150,7 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
     if (ngx_open_cached_file(clcf->open_file_cache, &dpath, &of, r->pool)
         != NGX_OK)
     {
+
         switch (of.err) {
         case 0:
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -162,19 +178,43 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
         return NGX_DECLINED;
     }
 
-//    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "random2 filename status: \"%s\"", dpath.data);
-
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "uri status: %s\n", r->uri.data);
+
+    u_char *mimejpg, *mimepng, *mimejpeg;
+
+    mimepng = ngx_strcasestrn(r->uri.data, (char *)"png", 3 - 1 );
+    mimejpg = ngx_strcasestrn(r->uri.data, (char *)"jpg", 3 - 1 );
+    mimejpeg = ngx_strcasestrn(r->uri.data, (char *)"jpeg", 4 - 1 );
 
     r->headers_out.status = NGX_HTTP_OK;
     r->headers_out.content_length_n = of.size;
+    r->headers_out.last_modified_time = of.mtime;
 
-    ngx_table_elt_t                *h;
-    h = ngx_list_push(&r->headers_out.headers);
-    h->hash = 1;
-    ngx_str_set(&h->key, "Content-Type");
-    ngx_str_set(&h->value, "image/webp");
-    r->headers_out.content_encoding = h;
+    if (pos != NULL) {
+      ngx_table_elt_t                *h;
+      h = ngx_list_push(&r->headers_out.headers);
+      h->hash = 1;
+      ngx_str_set(&h->key, "Content-Type");
+      ngx_str_set(&h->value, "image/webp");
+      r->headers_out.content_encoding = h;
+    }else{
+    if (mimepng != NULL){
+      ngx_table_elt_t                *h;
+      h = ngx_list_push(&r->headers_out.headers);
+      h->hash = 1;
+      ngx_str_set(&h->key, "Content-Type");
+      ngx_str_set(&h->value, "image/png");
+      r->headers_out.content_encoding = h;
+    }
+    if (mimejpg != NULL || mimejpeg != NULL){
+      ngx_table_elt_t                *h;
+      h = ngx_list_push(&r->headers_out.headers);
+      h->hash = 1;
+      ngx_str_set(&h->key, "Content-Type");
+      ngx_str_set(&h->value, "image/jpeg");
+      r->headers_out.content_encoding = h;
+    }
+    }
 
     b = ngx_pcalloc(r->pool, sizeof(ngx_buf_t));
     b->file = ngx_pcalloc(r->pool, sizeof(ngx_file_t));
