@@ -31,14 +31,14 @@ location ~ "\.jpg" {
 webp;
 }
 
-$ curl -SLIXGET -H "accept:image/webp" http://127.0.0.1/1.jpg
-HTTP/1.1 200 OK
-Server: nginx/1.13.12
-Date: Wed, 25 Apr 2018 10:16:45 GMT
-Content-Length: 223980
-Last-Modified: Wed, 25 Apr 2018 10:16:45 GMT
-Connection: keep-alive
-Content-Type: image/webp
+`$ curl -SLIXGET -H "accept:image/webp" http://127.0.0.1/1.jpg`
+`HTTP/1.1 200 OK`
+`Server: nginx/1.13.12`
+`Date: Wed, 25 Apr 2018 10:16:45 GMT`
+`Content-Length: 223980`
+`Last-Modified: Wed, 25 Apr 2018 10:16:45 GMT`
+`Connection: keep-alive`
+`Content-Type: image/webp`
 
 $ curl -SLIXGET -H "accept:image/*" http://127.0.0.1/1.jpg
 HTTP/1.1 200 OK
