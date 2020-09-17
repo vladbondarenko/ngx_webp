@@ -16,7 +16,7 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r);
 static ngx_command_t ngx_http_webp_commands[] = {
 
     { ngx_string("webp"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_NOARGS,
+      NGX_HTTP_LOC_CONF|NGX_CONF_NOARGS|NGX_ANY_CONF,
       ngx_http_webp,
       0,
       0,
@@ -62,7 +62,7 @@ static ngx_int_t ngx_http_webp_handler(ngx_http_request_t *r)
     int   status;
     pid_t parent_pid;
     pid_t child_pid;
-    parent_pid = getpid();
+    //parent_pid = getpid();
     child_pid = fork();
 
     ngx_open_file_info_t            of;
